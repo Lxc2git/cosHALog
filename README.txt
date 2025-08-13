@@ -1,0 +1,4 @@
+semantic：HDFS数据集的语义信息提取
+CNN&GRU：HDFS数据的实验代码和部分结果
+CNN&GRU_BGL：BGL数据的实验代码和部分结果
+Bert-base-cased需要自己去网上下载
