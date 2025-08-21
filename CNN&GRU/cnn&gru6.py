@@ -40,8 +40,8 @@ data_false = pd.read_excel(r'data\data_false.xlsx')
 data_true = pd.read_excel(r'data\data_true.xlsx')
 data_false = data_false.values[:, 1:]
 data_true = data_true.values[:, 1:]
-templatevec = pd.read_excel(r'..\语义信息\PCA20_idf.xlsx')
-# templatevec = pd.read_excel(r'..\语义信息\mean768.xlsx')
+templatevec = pd.read_excel(r'..\semantic\PCA20_idf.xlsx')
+# templatevec = pd.read_excel(r'..\semantic\mean768.xlsx')
 templatevec = templatevec.values
 # 对模板向量进行归一化
 # templatevec = (templatevec - np.min(templatevec, axis=1).reshape([-1, 1])) / (np.max(templatevec, axis=1) - np.min(templatevec, axis=1)).reshape([-1, 1])
