@@ -234,7 +234,7 @@ loss_fn = nn.CrossEntropyLoss()
 loss_fn = loss_fn.cuda()
 
 # optimizer
-learning_rate = 0.001
+learning_rate = 0.0005
 optimizer = torch.optim.Adam(network.parameters(), lr=learning_rate)
 
 # Parameters
@@ -243,7 +243,7 @@ total_train_step = 0
 # test step
 total_test_step = 0
 # epoch
-epoch = 200
+epoch = 300
 # indicators
 accuracy_graph = torch.zeros((1, epoch))
 P_graph = torch.zeros((1, epoch))
