@@ -10,8 +10,8 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 
-PRETRAINED_MODEL_NAME = "bert-base-chinese"  # 指定繁簡中文 BERT-BASE 預訓練模型
-PRETRAINED_MODEL_NAME1 = "bert-base-cased"  # 指定 BERT-BASE 預訓練模型
+PRETRAINED_MODEL_NAME = "bert-base-chinese"  
+PRETRAINED_MODEL_NAME1 = "bert-base-cased"  
 
 data = pd.read_csv(r'HDFS templates changed.csv')
 template = data.values[:, 1]
@@ -20,7 +20,7 @@ short = pd.read_excel(r'short_idf.xlsx')
 short = short.values
 # print(short)
 
-# 取得此預訓練模型所使用的 tokenizer
+# tokenizer
 tokenizer = BertTokenizer.from_pretrained(PRETRAINED_MODEL_NAME1)
 bert = BertModel.from_pretrained(PRETRAINED_MODEL_NAME1)
 
@@ -28,18 +28,18 @@ bert = BertModel.from_pretrained(PRETRAINED_MODEL_NAME1)
 # print(template[4])
 # print(tokens)
 #
-# # 将索引还原成文本
+# # index to text
 # retokens = tokenizer.convert_ids_to_tokens(tokens['input_ids'])
 # combined_text = " ".join(retokens)
 # print(combined_text)
 
-# 把short变为索引
+# short to index
 short = [tokenizer.convert_tokens_to_ids(short[i]) for i in range(29)]
 # print(short)
 
-# 将29个模板拼接在一起，形成tokens、segments、masks
+# concatenate 29 template，get tokens、segments、masks
 tokens = [torch.tensor(tokenizer.encode_plus(text=template[i])['input_ids']) for i in range(29)]
-tokens = pad_sequence([tokens[i] for i in range(29)], batch_first=True)  # 模板索引向量
+tokens = pad_sequence([tokens[i] for i in range(29)], batch_first=True)  
 print(tokens)
 segments = torch.zeros(tokens.shape, dtype=torch.long)
 masks = torch.zeros(tokens.shape, dtype=torch.long)
@@ -49,7 +49,7 @@ masks = masks.masked_fill(tokens != 0, 1)
 outputs = bert(tokens, segments, masks)  # torch.Size([29, 33, 768])
 print(outputs[0].shape)
 
-# 根据short的索引对应tokens的索引拼接3个词向量
+# 根据short的索引对应tokens的索引拼接3个词向量(concatenate 3 word vector)
 # templatevec = []
 # for i in range(29):
 #     for j in range(len(short[i])):
@@ -62,7 +62,8 @@ print(outputs[0].shape)
 # # print(templatevec)  # （29，2304）
 # # print(len(templatevec))
 
-# 降维============================================
+# dimensionality reduction
+============================================
 # PCA
 # pca = PCA(n_components=20)
 # newX = pca.fit_transform(templatevec)
@@ -74,7 +75,7 @@ print(outputs[0].shape)
 # X_tsne = tsne.fit_transform(np.array(templatevec))
 # print(X_tsne.shape)
 # y = range(29)
-# # 可视化
+# # visualization
 # # plt.figure(figsize=(8, 8))
 # # for i in range(len(y)):
 # #     plt.scatter(X_tsne[y == i, 0], X_tsne[y == i, 1], label=y[i])
