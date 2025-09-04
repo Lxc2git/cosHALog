@@ -1,6 +1,6 @@
 # python3.9
 # time:2024/11/11
-# CNN:Swiss注意力机制  GRU:dotproduct注意力机制
+# CNN:Swiss attention mechanism  GRU:dotproduct attention mechanism
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,7 @@ import time
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 def onehot(x):
-    # 将0变为0向量，其余变为对应的onehot编码
+    # Convert 0 into a zero vector, and the others into their corresponding one-hot encodings.
     # x:(batch_size, 50) -> (batch_size, 1, 50, 29)
     encode = torch.zeros((x.shape[0], 1, x.shape[1], 29))
     for i in range(x.shape[0]):
@@ -43,7 +43,7 @@ data_true = data_true.values[:, 1:]
 templatevec = pd.read_excel(r'..\semantic\PCA20_idf.xlsx')
 # templatevec = pd.read_excel(r'..\semantic\mean768.xlsx')
 templatevec = templatevec.values
-# 对模板向量进行归一化
+# Normalize the template vectors.
 # templatevec = (templatevec - np.min(templatevec, axis=1).reshape([-1, 1])) / (np.max(templatevec, axis=1) - np.min(templatevec, axis=1)).reshape([-1, 1])
 
 x_false = np.zeros((data_false.shape[0], length))
@@ -51,7 +51,7 @@ y_false = data_false[:, 0]
 x_true = np.zeros((data_true.shape[0], length))
 y_true = data_true[:, 0]
 
-# 将excel中的字符串转换为数字列表，同时将序列长度统一为50
+# Convert the strings in Excel into numeric lists, while standardizing the sequence length to 50.
 for i in range(data_false.shape[0]):
     data_false[i, 1] = data_false[i, 1].split(",")
     data_false[i, 1] = [int(x) for x in data_false[i, 1]]
@@ -69,7 +69,7 @@ for i in range(data_true.shape[0]):
         data_true[i, 1] = data_true[i, 1] + [0 for x in range(length - len(data_true[i, 1]))]
     x_true[i, :] = data_true[i, 1]
 
-# 将日志键序列转换为向量序列
+# Convert the log key sequence into a vector sequence.
 sequence_false = np.zeros((x_false.shape[0], x_false.shape[1], x_dimens))
 sequence_true = np.zeros((x_true.shape[0], x_true.shape[1], x_dimens))
 for i in range(x_false.shape[0]):
@@ -81,7 +81,7 @@ for i in range(x_true.shape[0]):
         if x_true[i, j] != 0:
             sequence_true[i, j, :] = templatevec[int(x_true[i, j]-1), :]
 
-# 构建训练集和测试集
+# Construct the training set and the test set.
 x_false_train, x_false_test, y_false_train, y_false_test = train_test_split(sequence_false, y_false, test_size=0.9, random_state=30)#, random_state=30)  # 0.9，0.65 30：0.986 100：0.986 测试到320
 x_true_train, x_true_test, y_true_train, y_true_test = train_test_split(sequence_true, y_true, test_size=0.99, random_state=70)#, random_state=70)  # 30 70
 # print(x_true_train.shape,"111", x_false_train.shape)
@@ -95,29 +95,27 @@ y_test = np.concatenate([y_false_test, y_true_test], axis=0).astype(dtype="int64
 x_train = torch.tensor(x_train).cuda()
 x_test = torch.tensor(x_test).cuda()
 y_train = torch.tensor(y_train).cuda()
-y_train = F.one_hot(y_train, 2).to(torch.float)  # 将标签变为onehot，异常为[0, 1]
+y_train = F.one_hot(y_train, 2).to(torch.float)  # Convert the labels into one-hot encoding, with anomalies represented as [0, 1].
 y_test = torch.tensor(y_test).cuda()
 y_test = F.one_hot(y_test, 2).to(torch.float)
 
 torch_train = Data.TensorDataset(x_train, y_train)
 torch_test = Data.TensorDataset(x_test, y_test)
 train_loader = Data.DataLoader(
-    dataset=torch_train,  # 数据集
-    batch_size=batch_size,  # 批大小
-    shuffle=True,  # 是否洗牌数据
-    drop_last=True  # 是否丢掉最后一个不完整的批次
+    dataset=torch_train,  
+    batch_size=batch_size,  
+    shuffle=True,  
+    drop_last=True  
 )
 test_loader = Data.DataLoader(
-    dataset=torch_test,  # 数据集
-    batch_size=batchsize_test,  # 批大小
-    shuffle=True,  # 是否洗牌数据
-    drop_last=True  # 是否丢掉最后一个不完整的批次
+    dataset=torch_test, 
+    batch_size=batchsize_test, 
+    shuffle=True,  
+    drop_last=True  
 )
-# 调试数据
-# x_false_train = torch.tensor(x_false_train).to(torch.int64).cuda()
-# 搭建模型
+# Build model
 channel_size = 16
-h_gru = 6
+h_gru = 16
 class NN(nn.Module):
     def __init__(self):
         super(NN, self).__init__()
@@ -156,7 +154,7 @@ class NN(nn.Module):
         x_cat = torch.cat([x1, x2, x3], dim=1)  # (batch_size,384,50)
         # x_cat = torch.cat([x1, x2, x3, x4.reshape([batchsize, h_gru, length])], dim=1)  # (batch_size,384,50)
 
-        # 构造注意力权重
+        # Construct the attention weights.
         for i in range(x.shape[2]):
             if i == 0:
                 attn = F.tanh(self.attention(x[:, :, i].reshape([x.shape[0], 1, channel_size])))
@@ -205,34 +203,34 @@ class NN(nn.Module):
         return y
 
 
-# 创建网络模型
+# Build neural network
 network = NN()
 network = network.cuda()
 
-# 损失函数
+# Loss function
 loss_fn = nn.CrossEntropyLoss()
 loss_fn = loss_fn.cuda()
 
-# 优化器
-learning_rate = 0.001
+# optimizer
+learning_rate = 0.0005
 optimizer = torch.optim.Adam(network.parameters(), lr=learning_rate)
 optimizer1 = torch.optim.Adam(network.parameters(), lr=0.0001)
 
-# 记录训练用的参数
-# 训练次数
+# Parameters
+# train step
 total_train_step = 0
-# 测试的次数
+# test step
 total_test_step = 0
-# 训练的轮数
-epoch = 200
-# 指标图
+# epoch
+epoch = 300
+# indicators
 accuracy_graph = torch.zeros((1, epoch))
 P_graph = torch.zeros((1, epoch))
 recall_graph = torch.zeros((1, epoch))
 F1_graph = torch.zeros((1, epoch))
 start = time.time()
 for i in range(epoch):
-    print("------第 {} 轮训练开始------".format(i))
+    print("------The {} epoch train start------".format(i))
 
     for data in train_loader:
         x, y = data
@@ -255,7 +253,7 @@ for i in range(epoch):
         F1 = (2*P*recall / (P + recall + epsilon))
         # F1 = 0
 
-        # 优化器优化模型
+        # optimizer
         if F1 < 1:
             optimizer.zero_grad()
             loss.backward()
@@ -267,11 +265,11 @@ for i in range(epoch):
 
         total_train_step += 1
         if total_train_step % 50 == 0:
-            print("训练次数: {}".format(total_train_step))
+            print("train step: {}".format(total_train_step))
             print("TP:{}, FP:{}, FN:{}".format(TP.item(), FP.item(), FN.item()))
             print("TrainLoss: {}, Accuracy: {}, P: {}, Recall: {} F1: {}".format(loss.item(), accuracy_train, P, recall, F1))
 
-    # 测试集
+    # Test
     total_test_loss = 0
     total_test_step = 0
     total_accuracy_test = 0
@@ -309,7 +307,7 @@ for i in range(epoch):
         # if i % 100 == 0:
     print("TestLoss: {}, Accuracy: {}, P: {}, Recall: {} F1: {}".format(total_test_loss.item()/total_test_step, total_accuracy_test/total_test_step, total_P/total_test_step, total_recall/total_test_step, total_F1/total_test_step))
 end = time.time()
-print("运行时间为：{}min".format((end-start)/60))
+print("running time：{}min".format((end-start)/60))
 # print(torch.squeeze(accuracy_graph))
 plt.plot(range(epoch), torch.squeeze(accuracy_graph), label="Accuracy")
 plt.plot(range(epoch), torch.squeeze(P_graph), label="P")
