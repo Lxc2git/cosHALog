@@ -10,8 +10,8 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 import matplotlib.pyplot as plt
 
-PRETRAINED_MODEL_NAME = "bert-base-chinese"  # 指定繁簡中文 BERT-BASE 預訓練模型
-PRETRAINED_MODEL_NAME1 = "bert-base-cased"  # 指定 BERT-BASE 預訓練模型
+PRETRAINED_MODEL_NAME = "bert-base-chinese" 
+PRETRAINED_MODEL_NAME1 = "bert-base-cased"  
 
 # data = pd.read_csv(r'HDFS templates changed.csv')
 data = pd.read_excel(r'HDFS templates no star.xlsx')
@@ -19,7 +19,7 @@ template = data.values[:, 1]
 # print(template.shape[0])
 
 
-# 取得此預訓練模型所使用的 tokenizer
+# tokenizer
 tokenizer = BertTokenizer.from_pretrained(PRETRAINED_MODEL_NAME1)
 bert = BertModel.from_pretrained(PRETRAINED_MODEL_NAME1)
 
@@ -27,21 +27,20 @@ bert = BertModel.from_pretrained(PRETRAINED_MODEL_NAME1)
 # print(template[4])
 # print(tokens)
 #
-# # 将索引还原成文本
+# # index to text
 # retokens = tokenizer.convert_ids_to_tokens(tokens['input_ids'])
 # combined_text = " ".join(retokens)
 # print(combined_text)
 
-# 将模板变为各token词向量的均值
+# get mean of all the token word vector
 newX = []
 for i in range(template.shape[0]):
-    # 将一行token化，再变为索引
     tokens = tokenizer.encode_plus(text=template[i])['input_ids'][1:-1]
     tokens = torch.tensor(tokens).reshape(1, -1)
     # print(tokens)
     # sentence = tokenizer.convert_tokens_to_ids(tokens)
 
-    # 设定segments、masks
+    # set segments、masks
     segments = torch.zeros(tokens.shape, dtype=torch.long)
     masks = torch.zeros(tokens.shape, dtype=torch.long)
     # masks = masks.masked_fill(tokens != 0, 1)
@@ -53,13 +52,13 @@ for i in range(template.shape[0]):
     newX.append(mean.detach().numpy().reshape(-1))
 print(newX)
 
-# 把short变为索引
+# short to index
 # short = [tokenizer.convert_tokens_to_ids(short[i]) for i in range(29)]
 # print(short)
 
-# 将29个模板拼接在一起，形成tokens、segments、masks
+# concatenate 29 templates，get tokens、segments、masks
 # tokens = [torch.tensor(tokenizer.encode_plus(text=template[i])['input_ids']) for i in range(29)]
-# tokens = pad_sequence([tokens[i] for i in range(29)], batch_first=True)  # 模板索引向量
+# tokens = pad_sequence([tokens[i] for i in range(29)], batch_first=True)  
 # # print(tokens)
 # segments = torch.zeros(tokens.shape, dtype=torch.long)
 # masks = torch.zeros(tokens.shape, dtype=torch.long)
@@ -69,7 +68,7 @@ print(newX)
 # outputs = bert(tokens, segments, masks)  # torch.Size([29, 33, 768])
 # print(outputs[0].shape)
 
-# 根据short的索引对应tokens的索引拼接3个词向量
+# 根据short的索引对应tokens的索引拼接3个词向量(concatenate 3 word vectors)
 # templatevec = []
 # for i in range(29):
 #     for j in range(len(short[i])):
@@ -82,7 +81,7 @@ print(newX)
 # # print(templatevec)  # （29，2304）
 # # print(len(templatevec))
 
-# 降维============================================
+# dimensionality reduction============================================
 # PCA
 # pca = PCA(n_components=20)
 # newX = pca.fit_transform(templatevec)
@@ -94,7 +93,7 @@ print(newX)
 # X_tsne = tsne.fit_transform(np.array(templatevec))
 # print(X_tsne.shape)
 # y = range(29)
-# # 可视化
+# # visualization
 # # plt.figure(figsize=(8, 8))
 # # for i in range(len(y)):
 # #     plt.scatter(X_tsne[y == i, 0], X_tsne[y == i, 1], label=y[i])
