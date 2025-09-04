@@ -262,7 +262,7 @@ for i in range(epoch):
 
         total_train_step += 1
         if total_train_step % 50 == 0:
-            print("train epoch: {}".format(total_train_step))
+            print("train step: {}".format(total_train_step))
             print("TP:{}, FP:{}, FN:{}".format(TP.item(), FP.item(), FN.item()))
             print("TrainLoss: {}, Accuracy: {}, P: {}, Recall: {} F1: {}".format(loss.item(), accuracy_train, P, recall, F1))
 
