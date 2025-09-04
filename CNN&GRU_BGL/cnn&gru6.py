@@ -43,7 +43,7 @@ data_true = pd.read_csv(r'BGL\random_test.csv', names=["序列", "标签"])
 data_false = data_false.values
 data_true = data_true.values
 templatevec = pd.read_excel(r'BGL\pca_vector.xlsx')
-# templatevec = pd.read_excel(r'..\语义信息\mean768.xlsx')
+# templatevec = pd.read_excel(r'..\semantic\mean768.xlsx')
 templatevec = templatevec.values
 # Normalize the template vectors.
 # templatevec = (templatevec - np.min(templatevec, axis=1).reshape([-1, 1])) / (np.max(templatevec, axis=1) - np.min(templatevec, axis=1)).reshape([-1, 1])
