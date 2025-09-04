@@ -92,7 +92,7 @@ y_test = np.concatenate([y_false_test, y_true_test], axis=0).astype(dtype="int64
 x_train = torch.tensor(x_train).cuda()
 x_test = torch.tensor(x_test).cuda()
 y_train = torch.tensor(y_train).cuda()
-y_train = F.one_hot(y_train, 2).to(torch.float)  # 将标签变为onehot，异常为[0, 1]
+y_train = F.one_hot(y_train, 2).to(torch.float)  # Convert the labels into one-hot encoding, with anomalies represented as [0, 1].
 y_test = torch.tensor(y_test).cuda()
 y_test = F.one_hot(y_test, 2).to(torch.float)
 
