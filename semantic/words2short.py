@@ -8,14 +8,14 @@ import torch
 from torch.nn.utils.rnn import pad_sequence
 
 
-PRETRAINED_MODEL_NAME = "bert-base-chinese"  # 指定繁簡中文 BERT-BASE 預訓練模型
-PRETRAINED_MODEL_NAME1 = "bert-base-cased"  # 指定 BERT-BASE 預訓練模型
+PRETRAINED_MODEL_NAME = "bert-base-chinese"  
+PRETRAINED_MODEL_NAME1 = "bert-base-cased"  
 
 data = pd.read_excel(r'template2word_idf.xlsx')
 words = data.values
 # print(words)
 
-# 取得此預訓練模型所使用的 tokenizer
+# tokenizer
 tokenizer = BertTokenizer.from_pretrained(PRETRAINED_MODEL_NAME1)
 bert = BertModel.from_pretrained(PRETRAINED_MODEL_NAME1)
 
